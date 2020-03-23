@@ -20,22 +20,40 @@ let violet;
     });
     getAndDeleteElements(square);
   });
-
-  function getAndDeleteElements(square) {
-    //функция, которая переносит элементы с одного списка в другой
-    const allLiInToDo = square.querySelectorAll(".toDo li");
-
-    allLiInToDo.forEach(everyLiInToDo => {
-      everyLiInToDo.addEventListener("click", () => {
-        everyLiInToDo.style.display = "none";
-        const liInDone = square.querySelectorAll(".doneThings li");
-        const index = liInDone.length - 1;
-        liInDone[index].appendChild(everyLiInToDo);
-        everyLiInToDo.style.display = "block";
-      });
-    });
-  }
 })();
+
+function getAndDeleteElements(square) {
+  //функция, которая переносит элементы с одного списка в другой
+  const allLiInToDo = square.querySelectorAll(".toDo li");
+  allLiInToDo.forEach(everyLiInToDo => {
+    const checkBox = everyLiInToDo.querySelectorAll("input")[0];
+    checkBox.addEventListener("click", () => {
+      moveFromToDoIntoDone(everyLiInToDo, square);
+    });
+  });
+  const standardElements = document.getElementsByTagName("span");
+  standardElements.forEach(standardElement => {
+    standardElement.addEventListener("click", () => {
+      deleteLi(standardElement);
+    });
+  });
+}
+function moveFromToDoIntoDone(li, square) {
+  const doneThing = square.querySelectorAll(".doneThings")[0];
+  doneThing.appendChild(li);
+  const checkBox = li.querySelectorAll("input")[0];
+  checkBox.addEventListener("click", () => {
+    fromDoneIntoToDo(li, square);
+  });
+}
+function fromDoneIntoToDo(li, square) {
+  const toDoThing = square.querySelectorAll(".toDo")[0];
+  toDoThing.appendChild(li);
+  const checkBox = li.querySelectorAll("input")[0];
+  checkBox.addEventListener("click", () => {
+    moveFromToDoIntoDone(li, square);
+  });
+}
 function addNewTask(square) {
   const value = getInputValue(square);
   if (value) {
@@ -49,10 +67,10 @@ function getInputValue(square) {
 
 function addNewElement(value, square) {
   const list = square.getElementsByClassName("toDo")[0];
-  const newLi = getLiWithText(value);
+  const newLi = getLiWithText(value, square);
   list.appendChild(newLi);
 }
-function getLiWithText(value) {
+function getLiWithText(value, square) {
   const newListItem = document.createElement("li");
   const checkBox = getCheckBox();
   const text = document.createTextNode(" " + value);
@@ -62,6 +80,9 @@ function getLiWithText(value) {
   newListItem.appendChild(text);
   newListItem.appendChild(space);
   newListItem.appendChild(icon);
+  checkBox.addEventListener("click", () => {
+    moveFromToDoIntoDone(newListItem, square);
+  });
   return newListItem;
 }
 function getCheckBox() {
@@ -71,17 +92,14 @@ function getCheckBox() {
 }
 function getIcon() {
   const icon = document.createElement("i");
+  const span = document.createElement("span");
   icon.className = "fas fa-trash";
-  return icon;
+  span.appendChild(icon);
+  span.addEventListener("click", () => {
+    deleteLi(span);
+  });
+  return span;
 }
-clickOnIconAndDelete(); //функция, которая должна была удалять элементы по нажатии на иконку
-
-function clickOnIconAndDelete() {
-  const allLis = document.getElementsByTagName("li");
-  const icons = document.getElementsByTagName("i");
-  icons.forEach(icon =>
-    icon.addEventListener("click", () => {
-      this.allLis.remove();
-    })
-  );
+function deleteLi(span) {
+  span.parentElement.remove();
 }
